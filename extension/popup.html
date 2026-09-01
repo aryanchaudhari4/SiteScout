@@ -1,31 +1,266 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
   <title>SiteScout</title>
-  <link rel="stylesheet" href="popup.css">
+
+  <link
+    rel="stylesheet"
+    href="popup.css"
+  >
 </head>
+
 <body>
-  <div class="container">
-    <div class="header">
-      <div class="logo-row">
-        <span class="logo">🔎</span>
-        <h1>SiteScout</h1>
+
+  <div class="app">
+
+    <!-- HEADER -->
+
+    <header class="header">
+
+      <div class="brand">
+
+        <div class="brand-icon">
+          ⌕
+        </div>
+
+        <div class="brand-text">
+
+          <h1>
+            SiteScout
+          </h1>
+
+          <p>
+            AI assistant for this webpage
+          </p>
+
+        </div>
+
       </div>
-      <p>AI assistant for this page</p>
-    </div>
 
-    <button id="openBtn" class="open-btn">Open SiteScout</button>
+      <div class="status">
 
-    <div id="statusRow" class="status-row">
-      <span id="statusDot" class="status-dot status-checking"></span>
-      <span id="statusText">Checking backend...</span>
-    </div>
+        <span class="status-dot"></span>
 
-    <div id="messageBox" class="message-box" hidden></div>
+        Ready
+
+      </div>
+
+    </header>
+
+
+    <!-- MAIN -->
+
+    <main class="content">
+
+      <section class="hero">
+
+        <div class="hero-icon">
+          ✦
+        </div>
+
+        <h2>
+          Ask anything about this page
+        </h2>
+
+        <p>
+          SiteScout reads the webpage you're
+          viewing and helps you understand it instantly.
+        </p>
+
+      </section>
+
+
+      <!-- QUICK ACTIONS -->
+
+      <section class="quick-actions">
+
+        <button
+          type="button"
+          class="quick-action"
+          data-query="Summarize this page"
+        >
+
+          <span class="action-icon">
+            ✦
+          </span>
+
+          <div class="action-content">
+
+            <strong>
+              Summarize this page
+            </strong>
+
+            <small>
+              Get a quick overview
+            </small>
+
+          </div>
+
+          <span class="arrow">
+            →
+          </span>
+
+        </button>
+
+
+        <button
+          type="button"
+          class="quick-action"
+          data-query="What are the key points?"
+        >
+
+          <span class="action-icon">
+            ◆
+          </span>
+
+          <div class="action-content">
+
+            <strong>
+              Find key points
+            </strong>
+
+            <small>
+              Discover the important information
+            </small>
+
+          </div>
+
+          <span class="arrow">
+            →
+          </span>
+
+        </button>
+
+
+        <button
+          type="button"
+          class="quick-action"
+          data-query="Explain this page simply"
+        >
+
+          <span class="action-icon">
+            ◇
+          </span>
+
+          <div class="action-content">
+
+            <strong>
+              Explain simply
+            </strong>
+
+            <small>
+              Make complex content easier
+            </small>
+
+          </div>
+
+          <span class="arrow">
+            →
+          </span>
+
+        </button>
+
+
+        <button
+          type="button"
+          class="quick-action"
+          data-query="What is the main idea?"
+        >
+
+          <span class="action-icon">
+            ◎
+          </span>
+
+          <div class="action-content">
+
+            <strong>
+              Find the main idea
+            </strong>
+
+            <small>
+              Understand the core message
+            </small>
+
+          </div>
+
+          <span class="arrow">
+            →
+          </span>
+
+        </button>
+
+      </section>
+
+
+      <!-- DIVIDER -->
+
+      <div class="divider">
+
+        <span>
+          OR ASK YOUR OWN QUESTION
+        </span>
+
+      </div>
+
+
+      <!-- INPUT -->
+
+      <section class="input-section">
+
+        <textarea
+          id="questionInput"
+          rows="3"
+          placeholder="Ask about this page..."
+        ></textarea>
+
+
+        <button
+          id="askButton"
+          type="button"
+        >
+
+          <span>
+            Ask SiteScout
+          </span>
+
+          <span class="send-icon">
+            →
+          </span>
+
+        </button>
+
+      </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+
+    <footer class="footer">
+
+      <span>
+        SiteScout
+      </span>
+
+      <span>
+        AI-powered webpage assistant
+      </span>
+
+    </footer>
+
   </div>
 
+
   <script src="popup.js"></script>
+
 </body>
+
 </html>
