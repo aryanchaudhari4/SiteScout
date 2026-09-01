@@ -6,26 +6,128 @@
   <title>SiteScout</title>
   <link rel="stylesheet" href="popup.css">
 </head>
+
 <body>
-  <div class="container">
-    <div class="header">
-      <div class="logo-row">
-        <span class="logo">🔎</span>
-        <h1>SiteScout</h1>
+
+  <div class="app">
+
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon">⌕</div>
+
+        <div>
+          <h1>SiteScout</h1>
+          <p>AI assistant for this webpage</p>
+        </div>
       </div>
-      <p>AI assistant for this page</p>
-    </div>
 
-    <button id="openBtn" class="open-btn">Open SiteScout</button>
+      <div class="status">
+        <span class="status-dot"></span>
+        Ready
+      </div>
+    </header>
 
-    <div id="statusRow" class="status-row">
-      <span id="statusDot" class="status-dot status-checking"></span>
-      <span id="statusText">Checking backend...</span>
-    </div>
 
-    <div id="messageBox" class="message-box" hidden></div>
+    <main class="content">
+
+      <div class="hero">
+
+        <div class="hero-icon">
+          ✦
+        </div>
+
+        <h2>Ask anything about this page</h2>
+
+        <p>
+          SiteScout reads the webpage you're viewing
+          and helps you understand it instantly.
+        </p>
+
+      </div>
+
+
+      <div class="quick-actions">
+
+        <button
+          class="quick-action"
+          data-query="Summarize this page">
+
+          <span class="action-icon">✦</span>
+
+          <div>
+            <strong>Summarize this page</strong>
+            <small>Get a quick overview</small>
+          </div>
+
+          <span class="arrow">→</span>
+
+        </button>
+
+
+        <button
+          class="quick-action"
+          data-query="What are the key points?">
+
+          <span class="action-icon">◆</span>
+
+          <div>
+            <strong>Key points</strong>
+            <small>Find the important information</small>
+          </div>
+
+          <span class="arrow">→</span>
+
+        </button>
+
+
+        <button
+          class="quick-action"
+          data-query="Explain this page simply">
+
+          <span class="action-icon">◇</span>
+
+          <div>
+            <strong>Explain simply</strong>
+            <small>Make complex content easier</small>
+          </div>
+
+          <span class="arrow">→</span>
+
+        </button>
+
+      </div>
+
+
+      <div class="divider">
+        <span>OR ASK YOUR OWN QUESTION</span>
+      </div>
+
+
+      <div class="input-section">
+
+        <textarea
+          id="questionInput"
+          placeholder="Ask about this page..."
+          rows="3"></textarea>
+
+        <button id="askButton">
+          <span>Ask SiteScout</span>
+          <span class="send-icon">→</span>
+        </button>
+
+      </div>
+
+    </main>
+
+
+    <footer class="footer">
+      <span>SiteScout</span>
+      <span>AI-powered webpage assistant</span>
+    </footer>
+
   </div>
 
   <script src="popup.js"></script>
+
 </body>
 </html>
