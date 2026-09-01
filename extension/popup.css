@@ -7,8 +7,8 @@ body {
   margin: 0;
   padding: 0;
 
-  width: 390px;
-  min-height: 540px;
+  width: 400px;
+  min-height: 500px;
 
   font-family:
     Inter,
@@ -17,34 +17,42 @@ body {
     "Segoe UI",
     sans-serif;
 
-  background: #111111;
-
+  background: #0b0b0b;
   color: #f5f5f5;
 }
 
 body {
   overflow: hidden;
+  padding: 7px;
 }
 
+
+/* ============================================================
+   APP FRAME
+============================================================ */
+
 .app {
-  min-height: 540px;
+  min-height: 486px;
 
   display: flex;
-
   flex-direction: column;
+
+  overflow: hidden;
+
+  border: 1px solid #303030;
+  border-radius: 18px;
 
   background:
     radial-gradient(
-      circle at top right,
-      rgba(
-        255,
-        107,
-        53,
-        0.09
-      ),
-      transparent 34%
+      circle at 92% 0%,
+      rgba(255, 107, 53, 0.12),
+      transparent 30%
     ),
     #111111;
+
+  box-shadow:
+    0 18px 45px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
 }
 
 
@@ -54,22 +62,16 @@ body {
 
 .header {
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
 
-  padding:
-    18px;
+  padding: 14px 17px;
 
-  border-bottom:
-    1px solid
-    #292929;
+  border-bottom: 1px solid #292929;
 }
 
 .brand {
   display: flex;
-
   align-items: center;
 
   gap: 10px;
@@ -77,35 +79,24 @@ body {
 
 .brand-icon {
   width: 37px;
-
   height: 37px;
 
   display: flex;
-
   align-items: center;
-
   justify-content: center;
 
   border-radius: 11px;
 
-  background:
-    #ff6b35;
+  background: #ff6b35;
 
-  color:
-    #111111;
+  color: #111111;
 
   font-size: 23px;
 
   font-weight: 800;
 
   box-shadow:
-    0 7px 20px
-    rgba(
-      255,
-      107,
-      53,
-      0.18
-    );
+    0 7px 20px rgba(255, 107, 53, 0.18);
 }
 
 .brand-text h1 {
@@ -115,51 +106,51 @@ body {
 
   font-weight: 750;
 
-  letter-spacing:
-    -0.2px;
+  letter-spacing: -0.2px;
 }
 
 .brand-text p {
-  margin:
-    3px 0 0;
+  margin: 3px 0 0;
 
-  font-size: 10.5px;
+  font-size: 10px;
 
-  color:
-    #777777;
+  color: #777777;
 }
+
+
+/* ============================================================
+   STATUS
+============================================================ */
 
 .status {
   display: flex;
-
   align-items: center;
 
   gap: 6px;
 
-  font-size: 9.5px;
+  padding: 5px 8px;
 
-  color:
-    #777777;
+  border: 1px solid #292929;
+
+  border-radius: 999px;
+
+  background: #171717;
+
+  font-size: 9px;
+
+  color: #8a8a8a;
 }
 
 .status-dot {
   width: 6px;
-
   height: 6px;
 
   border-radius: 50%;
 
-  background:
-    #4ade80;
+  background: #4ade80;
 
   box-shadow:
-    0 0 7px
-    rgba(
-      74,
-      222,
-      128,
-      0.5
-    );
+    0 0 7px rgba(74, 222, 128, 0.5);
 }
 
 
@@ -170,9 +161,7 @@ body {
 .content {
   flex: 1;
 
-  padding:
-    23px
-    18px;
+  padding: 17px 17px 13px;
 
   display: flex;
 
@@ -187,84 +176,61 @@ body {
 .hero {
   text-align: center;
 
-  padding:
-    8px
-    8px
-    22px;
+  padding: 2px 8px 14px;
 }
 
 .hero-icon {
-  width: 52px;
+  width: 50px;
+  height: 50px;
 
-  height: 52px;
-
-  margin:
-    0 auto
-    14px;
+  margin: 0 auto 10px;
 
   display: flex;
 
   align-items: center;
-
   justify-content: center;
 
-  border-radius: 16px;
+  border-radius: 15px;
 
   background:
     linear-gradient(
       145deg,
-      #242424,
-      #1a1a1a
+      #252525,
+      #181818
     );
 
-  border:
-    1px solid
-    #333333;
+  border: 1px solid #353535;
 
-  color:
-    #ff6b35;
+  color: #ff6b35;
 
-  font-size: 24px;
+  font-size: 23px;
 
   box-shadow:
-    0 12px 28px
-    rgba(
-      0,
-      0,
-      0,
-      0.2
-    );
+    0 10px 24px rgba(0, 0, 0, 0.22);
 }
 
 .hero h2 {
-  margin:
-    0 0 8px;
+  margin: 0 0 6px;
 
-  font-size: 18px;
+  font-size: 17px;
 
   line-height: 1.2;
 
   font-weight: 750;
 
-  letter-spacing:
-    -0.4px;
+  letter-spacing: -0.4px;
 }
 
 .hero p {
-  margin:
-    0 auto;
+  margin: 0 auto;
 
-  max-width:
-    300px;
+  max-width: 300px;
 
-  font-size:
-    11.5px;
+  font-size: 11px;
 
-  line-height:
-    1.55;
+  line-height: 1.5;
 
-  color:
-    #808080;
+  color: #808080;
 }
 
 
@@ -277,7 +243,7 @@ body {
 
   flex-direction: column;
 
-  gap: 7px;
+  gap: 6px;
 }
 
 .quick-action {
@@ -289,76 +255,63 @@ body {
 
   gap: 10px;
 
-  padding:
-    11px;
+  padding: 9px 10px;
 
-  border-radius:
-    11px;
+  border-radius: 11px;
 
-  border:
-    1px solid
-    #292929;
+  border: 1px solid #292929;
 
-  background:
-    #191919;
+  background: #181818;
 
-  color:
-    #eeeeee;
+  color: #eeeeee;
 
   cursor: pointer;
 
-  text-align:
-    left;
+  text-align: left;
 
   transition:
-    background
-    0.18s ease,
-    border-color
-    0.18s ease,
-    transform
-    0.18s ease;
+    background 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .quick-action:hover {
-  background:
-    #202020;
+  background: #202020;
 
   border-color:
-    rgba(
-      255,
-      107,
-      53,
-      0.75
-    );
+    rgba(255, 107, 53, 0.72);
 
   transform:
     translateY(-1px);
+
+  box-shadow:
+    0 7px 18px rgba(0, 0, 0, 0.18);
+}
+
+.quick-action:active {
+  transform:
+    translateY(0);
 }
 
 .action-icon {
-  width: 29px;
-
-  height: 29px;
+  width: 28px;
+  height: 28px;
 
   flex-shrink: 0;
 
   display: flex;
 
   align-items: center;
-
   justify-content: center;
 
-  border-radius:
-    8px;
+  border-radius: 8px;
 
-  background:
-    #252525;
+  background: #252525;
 
-  color:
-    #ff6b35;
+  color: #ff6b35;
 
-  font-size:
-    12px;
+  font-size: 12px;
 }
 
 .action-content {
@@ -368,43 +321,33 @@ body {
 .quick-action strong {
   display: block;
 
-  font-size:
-    11.5px;
+  font-size: 11px;
 
-  font-weight:
-    650;
+  font-weight: 650;
 }
 
 .quick-action small {
   display: block;
 
-  margin-top:
-    3px;
+  margin-top: 2px;
 
-  font-size:
-    9.5px;
+  font-size: 9px;
 
-  color:
-    #707070;
+  color: #707070;
 }
 
 .arrow {
-  color:
-    #555555;
+  color: #555555;
 
-  font-size:
-    15px;
+  font-size: 15px;
 
   transition:
-    transform
-    0.18s ease,
-    color
-    0.18s ease;
+    transform 0.18s ease,
+    color 0.18s ease;
 }
 
 .quick-action:hover .arrow {
-  color:
-    #ff6b35;
+  color: #ff6b35;
 
   transform:
     translateX(3px);
@@ -423,32 +366,25 @@ body {
   gap: 9px;
 
   margin:
-    20px 0
-    13px;
+    13px 0
+    9px;
 
-  color:
-    #555555;
+  color: #555555;
 
-  font-size:
-    8.5px;
+  font-size: 8px;
 
-  letter-spacing:
-    0.8px;
+  letter-spacing: 0.8px;
 }
 
 .divider::before,
 .divider::after {
-  content:
-    "";
+  content: "";
 
-  height:
-    1px;
+  height: 1px;
 
-  flex:
-    1;
+  flex: 1;
 
-  background:
-    #292929;
+  background: #292929;
 }
 
 
@@ -461,7 +397,7 @@ body {
 
   flex-direction: column;
 
-  gap: 8px;
+  gap: 7px;
 }
 
 #questionInput {
@@ -469,53 +405,51 @@ body {
 
   resize: none;
 
-  padding:
-    11px;
+  padding: 10px;
 
-  border-radius:
-    11px;
+  border-radius: 11px;
 
-  border:
-    1px solid
-    #303030;
+  border: 1px solid #303030;
 
-  background:
-    #191919;
+  background: #191919;
 
-  color:
-    #f5f5f5;
+  color: #f5f5f5;
 
-  font-family:
-    inherit;
+  font-family: inherit;
 
-  font-size:
-    11.5px;
+  font-size: 11px;
 
-  line-height:
-    1.5;
+  line-height: 1.45;
 
-  outline:
-    none;
+  outline: none;
 
   transition:
-    border-color
-    0.18s ease,
-    background
-    0.18s ease;
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+#questionInput:hover {
+  border-color: #3a3a3a;
 }
 
 #questionInput:focus {
-  border-color:
-    #ff6b35;
+  border-color: #ff6b35;
 
-  background:
-    #1d1d1d;
+  background: #1d1d1d;
+
+  box-shadow:
+    0 0 0 3px rgba(255, 107, 53, 0.08);
 }
 
 #questionInput::placeholder {
-  color:
-    #666666;
+  color: #666666;
 }
+
+
+/* ============================================================
+   ASK BUTTON
+============================================================ */
 
 #askButton {
   width: 100%;
@@ -523,61 +457,55 @@ body {
   display: flex;
 
   align-items: center;
-
   justify-content: center;
 
   gap: 8px;
 
-  padding:
-    11px;
+  padding: 10px;
 
   border:
-    none;
+    1px solid
+    rgba(255, 107, 53, 0.35);
 
-  border-radius:
-    10px;
+  border-radius: 10px;
 
-  background:
-    #ff6b35;
+  background: #ff6b35;
 
-  color:
-    #111111;
+  color: #111111;
 
-  font-size:
-    11.5px;
+  font-size: 11px;
 
-  font-weight:
-    750;
+  font-weight: 750;
 
-  cursor:
-    pointer;
+  cursor: pointer;
 
   transition:
-    background
-    0.18s ease,
-    transform
-    0.18s ease;
+    background 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 #askButton:hover {
-  background:
-    #ff7b4a;
+  background: #ff7b4a;
 
   transform:
     translateY(-1px);
+
+  box-shadow:
+    0 8px 20px rgba(255, 107, 53, 0.18);
 }
 
 #askButton:active {
   transform:
     translateY(0);
+
+  box-shadow: none;
 }
 
 .send-icon {
-  font-size:
-    15px;
+  font-size: 14px;
 
-  font-weight:
-    800;
+  font-weight: 800;
 }
 
 
@@ -592,17 +520,27 @@ body {
 
   justify-content: space-between;
 
-  padding:
-    10px
-    18px;
+  padding: 8px 17px;
 
-  border-top:
-    1px solid
-    #292929;
+  border-top: 1px solid #292929;
 
-  color:
-    #505050;
+  color: #505050;
 
-  font-size:
-    8.5px;
+  font-size: 8px;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
+@media (max-width: 420px) {
+  html,
+  body {
+    width: 100%;
+  }
+
+  body {
+    padding: 6px;
+  }
 }
