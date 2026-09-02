@@ -8,7 +8,7 @@ const askButton =
 
 
 /* ============================================================
-   SEND QUERY TO SITESCOUNT
+   SEND ACTION THROUGH BACKGROUND
 ============================================================ */
 
 function sendToSiteScout(query) {
@@ -19,92 +19,46 @@ function sendToSiteScout(query) {
     return;
   }
 
-  chrome.tabs.query(
-    {
-      active: true,
-      currentWindow: true
-    },
-    (tabs) => {
+  /*
+   * Send the request to the background service worker.
+   *
+   * Background worker will:
+   *
+   * 1. Find the active tab.
+   * 2. Open SiteScout.
+   * 3. Submit the selected query.
+   */
 
-      if (
-        chrome.runtime.lastError
-      ) {
+  chrome.runtime.sendMessage(
+    {
+      type: "sitescout:popup_action",
+      query: text
+    },
+    (response) => {
+
+      if (chrome.runtime.lastError) {
         console.error(
-          "SiteScout:",
+          "SiteScout popup error:",
           chrome.runtime.lastError.message
         );
 
         return;
       }
 
-      if (
-        !tabs ||
-        !tabs.length ||
-        !tabs[0].id
-      ) {
+      if (!response || !response.ok) {
+        console.error(
+          "SiteScout could not perform action:",
+          response?.error || "unknown_error"
+        );
+
         return;
       }
 
-      const tab = tabs[0];
-
       /*
-       * First open SiteScout.
+       * Close popup after the action
+       * has successfully been sent.
        */
-      chrome.tabs.sendMessage(
-        tab.id,
-        {
-          type: "sitescout:toggle"
-        },
-        () => {
-
-          if (
-            chrome.runtime.lastError
-          ) {
-            console.error(
-              "SiteScout could not open:",
-              chrome.runtime.lastError.message
-            );
-
-            return;
-          }
-
-          /*
-           * Give content.js a moment to
-           * update the UI before submitting.
-           */
-          setTimeout(() => {
-
-            chrome.tabs.sendMessage(
-              tab.id,
-              {
-                type: "sitescout:submit",
-                query: text
-              },
-              () => {
-
-                if (
-                  chrome.runtime.lastError
-                ) {
-                  console.error(
-                    "SiteScout could not submit query:",
-                    chrome.runtime.lastError.message
-                  );
-                }
-
-              }
-            );
-
-          }, 120);
-
-          /*
-           * Close popup after sending.
-           */
-          setTimeout(() => {
-            window.close();
-          }, 150);
-
-        }
-      );
+      window.close();
     }
   );
 }
@@ -117,9 +71,11 @@ function sendToSiteScout(query) {
 askButton.addEventListener(
   "click",
   () => {
+
     sendToSiteScout(
       questionInput.value
     );
+
   }
 );
 
@@ -142,6 +98,7 @@ questionInput.addEventListener(
       sendToSiteScout(
         questionInput.value
       );
+
     }
 
   }
@@ -152,13 +109,9 @@ questionInput.addEventListener(
    QUICK ACTIONS
 ============================================================ */
 
-const quickActions =
-  document.querySelectorAll(
-    ".quick-action"
-  );
-
-quickActions.forEach(
-  (button) => {
+document
+  .querySelectorAll(".quick-action")
+  .forEach((button) => {
 
     button.addEventListener(
       "click",
@@ -170,11 +123,11 @@ quickActions.forEach(
           );
 
         sendToSiteScout(query);
+
       }
     );
 
-  }
-);
+  });
 
 
 /* ============================================================
