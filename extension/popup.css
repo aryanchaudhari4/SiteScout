@@ -2,25 +2,15 @@
   box-sizing: border-box;
 }
 
-html {
-  margin: 0;
-  padding: 0;
-
-  width: 390px;
-
-  background: #111111;
-}
-
+html,
 body {
   margin: 0;
   padding: 0;
 
-  width: 390px;
+  width: 360px;
+  height: 460px;
 
-  max-height: 600px;
-
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
 
   font-family:
     Inter,
@@ -31,26 +21,10 @@ body {
 
   background: #111111;
   color: #f5f5f5;
-
-  scrollbar-width: thin;
-  scrollbar-color: #3a3a3a transparent;
 }
 
-body::-webkit-scrollbar {
-  width: 6px;
-}
-
-body::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-body::-webkit-scrollbar-thumb {
-  background: #3a3a3a;
-  border-radius: 10px;
-}
-
-body::-webkit-scrollbar-thumb:hover {
-  background: #505050;
+body {
+  display: block;
 }
 
 button,
@@ -59,22 +33,19 @@ textarea {
 }
 
 .app {
-  width: 390px;
-  min-height: 100%;
+  width: 360px;
+  height: 460px;
 
   display: flex;
   flex-direction: column;
 
+  overflow: hidden;
+
   background:
     radial-gradient(
       circle at top right,
-      rgba(255, 107, 53, 0.11),
+      rgba(255, 107, 53, 0.10),
       transparent 35%
-    ),
-    radial-gradient(
-      circle at bottom left,
-      rgba(255, 107, 53, 0.04),
-      transparent 30%
     ),
     #111111;
 }
@@ -85,77 +56,73 @@ textarea {
 ============================================================ */
 
 .header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  flex-shrink: 0;
+
+  height: 66px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  padding: 16px 18px;
+  padding: 14px 16px;
 
   border-bottom: 1px solid #292929;
-
-  background: rgba(17, 17, 17, 0.96);
-
-  backdrop-filter: blur(10px);
 }
 
 .brand {
   display: flex;
   align-items: center;
 
-  gap: 10px;
+  gap: 9px;
 }
 
 .brand-icon {
-  width: 37px;
-  height: 37px;
+  width: 34px;
+  height: 34px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  border-radius: 11px;
+  border-radius: 10px;
 
   background: #ff6b35;
   color: #111111;
 
-  font-size: 23px;
+  font-size: 21px;
   font-weight: 800;
 
   box-shadow:
-    0 7px 20px
+    0 6px 16px
     rgba(255, 107, 53, 0.18);
 }
 
 .brand-text h1 {
   margin: 0;
 
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 750;
 
   letter-spacing: -0.2px;
 }
 
 .brand-text p {
-  margin: 3px 0 0;
+  margin: 2px 0 0;
 
-  font-size: 10.5px;
+  font-size: 9.5px;
 
-  color: #777777;
+  color: #737373;
 }
 
 .status {
   display: flex;
   align-items: center;
 
-  gap: 6px;
+  gap: 5px;
 
-  font-size: 9.5px;
+  font-size: 9px;
 
-  color: #777777;
+  color: #737373;
 }
 
 .status-dot {
@@ -173,18 +140,18 @@ textarea {
 
 
 /* ============================================================
-   MAIN
+   CONTENT
 ============================================================ */
 
 .content {
-  width: 100%;
+  flex: 1;
 
-  padding: 20px 18px 18px;
+  min-height: 0;
+
+  padding: 17px 16px 13px;
 
   display: flex;
   flex-direction: column;
-
-  gap: 0;
 }
 
 
@@ -193,22 +160,24 @@ textarea {
 ============================================================ */
 
 .hero {
+  flex-shrink: 0;
+
   text-align: center;
 
-  padding: 4px 8px 18px;
+  padding: 2px 8px 15px;
 }
 
 .hero-icon {
-  width: 48px;
-  height: 48px;
+  width: 43px;
+  height: 43px;
 
-  margin: 0 auto 12px;
+  margin: 0 auto 9px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  border-radius: 15px;
+  border-radius: 13px;
 
   background:
     linear-gradient(
@@ -221,35 +190,31 @@ textarea {
 
   color: #ff6b35;
 
-  font-size: 23px;
-
-  box-shadow:
-    0 12px 28px
-    rgba(0, 0, 0, 0.22);
+  font-size: 20px;
 }
 
 .hero h2 {
-  margin: 0 0 7px;
+  margin: 0 0 5px;
 
-  font-size: 18px;
+  font-size: 17px;
 
   line-height: 1.2;
 
   font-weight: 750;
 
-  letter-spacing: -0.4px;
+  letter-spacing: -0.35px;
 }
 
 .hero p {
   margin: 0 auto;
 
-  max-width: 305px;
+  max-width: 285px;
 
-  font-size: 11.5px;
+  font-size: 10px;
 
-  line-height: 1.5;
+  line-height: 1.45;
 
-  color: #808080;
+  color: #777777;
 }
 
 
@@ -258,25 +223,26 @@ textarea {
 ============================================================ */
 
 .quick-actions {
+  flex-shrink: 0;
+
   display: flex;
   flex-direction: column;
 
-  gap: 7px;
+  gap: 6px;
 }
 
 .quick-action {
   width: 100%;
-
-  min-height: 58px;
+  height: 57px;
 
   display: flex;
   align-items: center;
 
-  gap: 11px;
+  gap: 9px;
 
-  padding: 11px;
+  padding: 9px;
 
-  border-radius: 12px;
+  border-radius: 10px;
 
   border: 1px solid #292929;
 
@@ -291,23 +257,18 @@ textarea {
   appearance: none;
 
   transition:
-    background 0.18s ease,
-    border-color 0.18s ease,
-    transform 0.18s ease,
-    box-shadow 0.18s ease;
+    background 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.16s ease;
 }
 
 .quick-action:hover {
   background: #202020;
 
   border-color:
-    rgba(255, 107, 53, 0.72);
+    rgba(255, 107, 53, 0.70);
 
   transform: translateY(-1px);
-
-  box-shadow:
-    0 7px 18px
-    rgba(0, 0, 0, 0.18);
 }
 
 .quick-action:active {
@@ -315,8 +276,8 @@ textarea {
 }
 
 .action-icon {
-  width: 31px;
-  height: 31px;
+  width: 29px;
+  height: 29px;
 
   flex-shrink: 0;
 
@@ -324,24 +285,13 @@ textarea {
   align-items: center;
   justify-content: center;
 
-  border-radius: 9px;
+  border-radius: 8px;
 
   background: #252525;
 
   color: #ff6b35;
 
-  font-size: 13px;
-
-  transition:
-    background 0.18s ease,
-    transform 0.18s ease;
-}
-
-.quick-action:hover .action-icon {
-  background:
-    rgba(255, 107, 53, 0.12);
-
-  transform: scale(1.05);
+  font-size: 12px;
 }
 
 .action-content {
@@ -353,7 +303,7 @@ textarea {
 .quick-action strong {
   display: block;
 
-  font-size: 11.8px;
+  font-size: 11px;
 
   font-weight: 650;
 }
@@ -361,13 +311,11 @@ textarea {
 .quick-action small {
   display: block;
 
-  margin-top: 3px;
+  margin-top: 2px;
 
-  font-size: 9.5px;
+  font-size: 8.8px;
 
-  color: #707070;
-
-  line-height: 1.3;
+  color: #6f6f6f;
 }
 
 .arrow {
@@ -375,11 +323,11 @@ textarea {
 
   color: #555555;
 
-  font-size: 15px;
+  font-size: 14px;
 
   transition:
-    transform 0.18s ease,
-    color 0.18s ease;
+    transform 0.16s ease,
+    color 0.16s ease;
 }
 
 .quick-action:hover .arrow {
@@ -394,18 +342,20 @@ textarea {
 ============================================================ */
 
 .divider {
+  flex-shrink: 0;
+
   display: flex;
   align-items: center;
 
-  gap: 9px;
+  gap: 8px;
 
-  margin: 17px 0 12px;
+  margin: 13px 0 9px;
 
-  color: #555555;
+  color: #505050;
 
-  font-size: 8.5px;
+  font-size: 7.5px;
 
-  letter-spacing: 0.8px;
+  letter-spacing: 0.7px;
 
   white-space: nowrap;
 }
@@ -427,24 +377,23 @@ textarea {
 ============================================================ */
 
 .input-section {
+  flex-shrink: 0;
+
   display: flex;
   flex-direction: column;
 
-  gap: 8px;
+  gap: 6px;
 }
 
 #questionInput {
   width: 100%;
+  height: 55px;
 
-  min-height: 72px;
+  resize: none;
 
-  max-height: 120px;
+  padding: 9px;
 
-  resize: vertical;
-
-  padding: 11px;
-
-  border-radius: 11px;
+  border-radius: 9px;
 
   border: 1px solid #303030;
 
@@ -452,52 +401,50 @@ textarea {
 
   color: #f5f5f5;
 
-  font-size: 11.5px;
+  font-size: 10.5px;
 
-  line-height: 1.5;
+  line-height: 1.4;
 
   outline: none;
 
+  overflow-y: auto;
+
   transition:
-    border-color 0.18s ease,
-    background 0.18s ease,
-    box-shadow 0.18s ease;
+    border-color 0.16s ease,
+    background 0.16s ease;
 }
 
 #questionInput:focus {
   border-color: #ff6b35;
 
   background: #1d1d1d;
-
-  box-shadow:
-    0 0 0 2px
-    rgba(255, 107, 53, 0.07);
 }
 
 #questionInput::placeholder {
-  color: #666666;
+  color: #606060;
 }
 
 #askButton {
   width: 100%;
+  height: 35px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  gap: 8px;
+  gap: 7px;
 
-  padding: 11px;
+  padding: 8px;
 
   border: none;
 
-  border-radius: 10px;
+  border-radius: 9px;
 
   background: #ff6b35;
 
   color: #111111;
 
-  font-size: 11.5px;
+  font-size: 10.5px;
 
   font-weight: 750;
 
@@ -506,19 +453,14 @@ textarea {
   appearance: none;
 
   transition:
-    background 0.18s ease,
-    transform 0.18s ease,
-    box-shadow 0.18s ease;
+    background 0.16s ease,
+    transform 0.16s ease;
 }
 
 #askButton:hover {
   background: #ff7b4a;
 
   transform: translateY(-1px);
-
-  box-shadow:
-    0 7px 18px
-    rgba(255, 107, 53, 0.16);
 }
 
 #askButton:active {
@@ -526,7 +468,7 @@ textarea {
 }
 
 .send-icon {
-  font-size: 15px;
+  font-size: 13px;
 
   font-weight: 800;
 }
@@ -537,19 +479,21 @@ textarea {
 ============================================================ */
 
 .footer {
+  flex-shrink: 0;
+
+  height: 31px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  gap: 10px;
-
-  padding: 10px 18px;
+  padding: 0 16px;
 
   border-top: 1px solid #292929;
 
-  color: #505050;
+  color: #4f4f4f;
 
-  font-size: 8.5px;
+  font-size: 7.5px;
 }
 
 .footer span:last-child {
