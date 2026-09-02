@@ -3,18 +3,11 @@
 
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>SiteScout</title>
 
-  <link
-    rel="stylesheet"
-    href="popup.css"
-  >
+  <link rel="stylesheet" href="popup.css">
 </head>
 
 <body>
@@ -22,7 +15,6 @@
   <div class="app">
 
     <!-- HEADER -->
-
     <header class="header">
 
       <div class="brand">
@@ -32,34 +24,24 @@
         </div>
 
         <div class="brand-text">
-
-          <h1>
-            SiteScout
-          </h1>
-
-          <p>
-            AI assistant for this webpage
-          </p>
-
+          <h1>SiteScout</h1>
+          <p>AI assistant for this webpage</p>
         </div>
 
       </div>
 
       <div class="status">
-
         <span class="status-dot"></span>
-
-        Ready
-
+        <span>Ready</span>
       </div>
 
     </header>
 
 
     <!-- MAIN -->
-
     <main class="content">
 
+      <!-- HERO -->
       <section class="hero">
 
         <div class="hero-icon">
@@ -67,21 +49,21 @@
         </div>
 
         <h2>
-          Ask anything about this page
+          What would you like to know?
         </h2>
 
         <p>
-          SiteScout reads the webpage you're
-          viewing and helps you understand it instantly.
+          Choose an action below and SiteScout will
+          analyze the webpage you're currently viewing.
         </p>
 
       </section>
 
 
       <!-- QUICK ACTIONS -->
-
       <section class="quick-actions">
 
+        <!-- SUMMARY -->
         <button
           type="button"
           class="quick-action"
@@ -93,15 +75,8 @@
           </span>
 
           <div class="action-content">
-
-            <strong>
-              Summarize this page
-            </strong>
-
-            <small>
-              Get a quick overview
-            </small>
-
+            <strong>Summarize this page</strong>
+            <small>Get the main idea in seconds</small>
           </div>
 
           <span class="arrow">
@@ -111,26 +86,20 @@
         </button>
 
 
+        <!-- IMPORTANT INFORMATION -->
         <button
           type="button"
           class="quick-action"
-          data-query="What are the key points?"
+          data-query="Find the most important information on this page"
         >
 
           <span class="action-icon">
-            ◆
+            ★
           </span>
 
           <div class="action-content">
-
-            <strong>
-              Find key points
-            </strong>
-
-            <small>
-              Discover the important information
-            </small>
-
+            <strong>Find important information</strong>
+            <small>See the most useful points</small>
           </div>
 
           <span class="arrow">
@@ -140,6 +109,7 @@
         </button>
 
 
+        <!-- EXPLAIN SIMPLY -->
         <button
           type="button"
           class="quick-action"
@@ -147,48 +117,12 @@
         >
 
           <span class="action-icon">
-            ◇
+            ✧
           </span>
 
           <div class="action-content">
-
-            <strong>
-              Explain simply
-            </strong>
-
-            <small>
-              Make complex content easier
-            </small>
-
-          </div>
-
-          <span class="arrow">
-            →
-          </span>
-
-        </button>
-
-
-        <button
-          type="button"
-          class="quick-action"
-          data-query="What is the main idea?"
-        >
-
-          <span class="action-icon">
-            ◎
-          </span>
-
-          <div class="action-content">
-
-            <strong>
-              Find the main idea
-            </strong>
-
-            <small>
-              Understand the core message
-            </small>
-
+            <strong>Explain this page simply</strong>
+            <small>Make complex content easier</small>
           </div>
 
           <span class="arrow">
@@ -201,26 +135,19 @@
 
 
       <!-- DIVIDER -->
-
       <div class="divider">
-
-        <span>
-          OR ASK YOUR OWN QUESTION
-        </span>
-
+        <span>OR ASK YOUR OWN QUESTION</span>
       </div>
 
 
-      <!-- INPUT -->
-
+      <!-- CUSTOM QUESTION -->
       <section class="input-section">
 
         <textarea
           id="questionInput"
           rows="3"
-          placeholder="Ask about this page..."
+          placeholder="Ask anything about this page..."
         ></textarea>
-
 
         <button
           id="askButton"
@@ -243,7 +170,6 @@
 
 
     <!-- FOOTER -->
-
     <footer class="footer">
 
       <span>
