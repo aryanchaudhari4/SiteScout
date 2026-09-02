@@ -1,10 +1,18 @@
 "use strict";
 
-const questionInput = document.getElementById("questionInput");
-const askButton = document.getElementById("askButton");
+const questionInput =
+  document.getElementById("questionInput");
+
+const askButton =
+  document.getElementById("askButton");
+
+
+/* ============================================================
+   SEND QUERY TO SITESCOUNT
+============================================================ */
 
 function sendToSiteScout(query) {
-  const text = query.trim();
+  const text = String(query || "").trim();
 
   if (!text) {
     questionInput.focus();
@@ -18,12 +26,30 @@ function sendToSiteScout(query) {
     },
     (tabs) => {
 
-      if (!tabs || !tabs.length) {
+      if (
+        chrome.runtime.lastError
+      ) {
+        console.error(
+          "SiteScout:",
+          chrome.runtime.lastError.message
+        );
+
+        return;
+      }
+
+      if (
+        !tabs ||
+        !tabs.length ||
+        !tabs[0].id
+      ) {
         return;
       }
 
       const tab = tabs[0];
 
+      /*
+       * First open SiteScout.
+       */
       chrome.tabs.sendMessage(
         tab.id,
         {
@@ -31,24 +57,52 @@ function sendToSiteScout(query) {
         },
         () => {
 
-          if (chrome.runtime.lastError) {
+          if (
+            chrome.runtime.lastError
+          ) {
             console.error(
-              "SiteScout could not open the page overlay:",
+              "SiteScout could not open:",
               chrome.runtime.lastError.message
             );
 
             return;
           }
 
-          chrome.tabs.sendMessage(
-            tab.id,
-            {
-              type: "sitescout:submit",
-              query: text
-            }
-          );
+          /*
+           * Give content.js a moment to
+           * update the UI before submitting.
+           */
+          setTimeout(() => {
 
-          window.close();
+            chrome.tabs.sendMessage(
+              tab.id,
+              {
+                type: "sitescout:submit",
+                query: text
+              },
+              () => {
+
+                if (
+                  chrome.runtime.lastError
+                ) {
+                  console.error(
+                    "SiteScout could not submit query:",
+                    chrome.runtime.lastError.message
+                  );
+                }
+
+              }
+            );
+
+          }, 120);
+
+          /*
+           * Close popup after sending.
+           */
+          setTimeout(() => {
+            window.close();
+          }, 150);
+
         }
       );
     }
@@ -56,44 +110,88 @@ function sendToSiteScout(query) {
 }
 
 
-/* ASK BUTTON */
+/* ============================================================
+   ASK BUTTON
+============================================================ */
 
-askButton.addEventListener("click", () => {
-  sendToSiteScout(questionInput.value);
-});
-
-
-/* ENTER TO SEND */
-
-questionInput.addEventListener("keydown", (event) => {
-
-  if (event.key === "Enter" && !event.shiftKey) {
-
-    event.preventDefault();
-
-    sendToSiteScout(questionInput.value);
+askButton.addEventListener(
+  "click",
+  () => {
+    sendToSiteScout(
+      questionInput.value
+    );
   }
-
-});
-
-
-/* QUICK ACTIONS */
-
-document.querySelectorAll(".quick-action").forEach((button) => {
-
-  button.addEventListener("click", () => {
-
-    const query = button.dataset.query;
-
-    sendToSiteScout(query);
-
-  });
-
-});
+);
 
 
-/* AUTO FOCUS */
+/* ============================================================
+   ENTER TO SEND
+============================================================ */
 
-window.addEventListener("load", () => {
-  questionInput.focus();
-});
+questionInput.addEventListener(
+  "keydown",
+  (event) => {
+
+    if (
+      event.key === "Enter" &&
+      !event.shiftKey
+    ) {
+
+      event.preventDefault();
+
+      sendToSiteScout(
+        questionInput.value
+      );
+    }
+
+  }
+);
+
+
+/* ============================================================
+   QUICK ACTIONS
+============================================================ */
+
+const quickActions =
+  document.querySelectorAll(
+    ".quick-action"
+  );
+
+quickActions.forEach(
+  (button) => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        const query =
+          button.getAttribute(
+            "data-query"
+          );
+
+        sendToSiteScout(query);
+      }
+    );
+
+  }
+);
+
+
+/* ============================================================
+   AUTO FOCUS
+============================================================ */
+
+window.addEventListener(
+  "load",
+  () => {
+
+    setTimeout(() => {
+
+      if (questionInput) {
+        questionInput.focus();
+      }
+
+    }, 50);
+
+  }
+);
