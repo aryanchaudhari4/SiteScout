@@ -1,168 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>SiteScout</title>
-
   <link rel="stylesheet" href="popup.css">
 </head>
-
 <body>
-
   <div class="app">
-
-    <!-- HEADER -->
     <header class="header">
-
       <div class="brand">
-
-        <div class="brand-icon">
-          ⌕
+        <div class="brand-mark"><img src="icon.jpg" alt="SiteScout"></div>
+        <div>
+          <div class="brand-name">SiteScout</div>
+          <div class="brand-tag">Understand any page, instantly.</div>
         </div>
-
-        <div class="brand-text">
-          <h1>SiteScout</h1>
-          <p>AI assistant for this webpage</p>
-        </div>
-
       </div>
-
-      <div class="status">
-        <span class="status-dot"></span>
-        Ready
-      </div>
-
+      <div class="live"><span></span> Ready</div>
     </header>
 
-
-    <!-- CONTENT -->
     <main class="content">
-
       <section class="hero">
-
-        <div class="hero-icon">
-          ✦
-        </div>
-
-        <h2>What would you like to do?</h2>
-
-        <p>
-          Choose an option to understand this webpage instantly.
-        </p>
-
+        <div class="hero-orb"><img src="icon.jpg" alt="SiteScout"></div>
+        <div class="eyebrow">AI PAGE COPILOT</div>
+        <h1>What should we<br><em>discover?</em></h1>
+        <p>SiteScout reads the page you're on and turns it into clear, useful answers.</p>
       </section>
 
-
-      <!-- QUICK ACTIONS -->
       <section class="quick-actions">
-
-        <button
-          type="button"
-          class="quick-action"
-          data-query="Summarize this page"
-        >
-
-          <span class="action-icon">
-            ✦
-          </span>
-
-          <span class="action-content">
-            <strong>Summarize this page</strong>
-            <small>Get the main idea quickly</small>
-          </span>
-
-          <span class="arrow">→</span>
-
+        <button class="quick-action" data-query="Summarize this page" type="button">
+          <span class="action-number">01</span><span class="action-icon">◎</span>
+          <span class="action-copy"><strong>Summarize this page</strong><small>Get the big picture in seconds</small></span><span class="arrow">↗</span>
         </button>
-
-
-        <button
-          type="button"
-          class="quick-action"
-          data-query="Find the most important information on this page"
-        >
-
-          <span class="action-icon">
-            ★
-          </span>
-
-          <span class="action-content">
-            <strong>Find important information</strong>
-            <small>See the key information</small>
-          </span>
-
-          <span class="arrow">→</span>
-
+        <button class="quick-action" data-query="What are the key points?" type="button">
+          <span class="action-number">02</span><span class="action-icon">⌁</span>
+          <span class="action-copy"><strong>Find the key points</strong><small>Surface the information that matters</small></span><span class="arrow">↗</span>
         </button>
-
-
-        <button
-          type="button"
-          class="quick-action"
-          data-query="Explain this page simply"
-        >
-
-          <span class="action-icon">
-            ✧
-          </span>
-
-          <span class="action-content">
-            <strong>Explain this page simply</strong>
-            <small>Make complex content easy</small>
-          </span>
-
-          <span class="arrow">→</span>
-
+        <button class="quick-action" data-query="Explain this page simply" type="button">
+          <span class="action-number">03</span><span class="action-icon">◈</span>
+          <span class="action-copy"><strong>Explain it simply</strong><small>Turn complex content into plain English</small></span><span class="arrow">↗</span>
         </button>
-
       </section>
 
-
-      <!-- DIVIDER -->
-      <div class="divider">
-        <span>OR ASK YOUR OWN QUESTION</span>
-      </div>
-
-
-      <!-- QUESTION -->
+      <div class="divider"><span>OR ASK ANYTHING</span></div>
       <section class="input-section">
-
-        <textarea
-          id="questionInput"
-          rows="2"
-          placeholder="Ask anything about this page..."
-        ></textarea>
-
-        <button
-          id="askButton"
-          type="button"
-        >
-          <span>Ask SiteScout</span>
-          <span class="send-icon">→</span>
-        </button>
-
+        <textarea id="questionInput" rows="2" placeholder="Ask a question about this page..."></textarea>
+        <button id="askButton" type="button"><span>Ask SiteScout</span><span>→</span></button>
       </section>
-
     </main>
 
-
-    <!-- FOOTER -->
-    <footer class="footer">
-
-      <span>SiteScout</span>
-
-      <span>AI-powered webpage assistant</span>
-
-    </footer>
-
+    <footer><span class="footer-brand"><img src="icon.jpg" alt=""> SiteScout</span><span>Local AI • Private by design</span></footer>
   </div>
-
-
   <script src="popup.js"></script>
-
 </body>
-
 </html>
