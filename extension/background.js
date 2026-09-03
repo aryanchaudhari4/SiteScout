@@ -1,10 +1,8 @@
 "use strict";
 
 const BACKEND_ENDPOINTS = [
-  "http://127.0.0.1:8000/chat",
-  "http://localhost:8000/chat"
+  "https://sitescout-backend-9duz.onrender.com/chat"
 ];
-
 async function forwardChatRequest(payload) {
   let lastError = null;
   for (const url of BACKEND_ENDPOINTS) {
