@@ -8,7 +8,7 @@ from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_community.vectorstores import FAISS
 from langchain_core.output_parsers import StrOutputParser
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.embeddings import FastEmbedEmbeddings
 from langchain_core.documents import Document
 
 
