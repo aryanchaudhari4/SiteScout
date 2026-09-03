@@ -1,8 +1,21 @@
 "use strict";
 
+const BACKEND_BASE_URL = "https://sitescout-backend-9duz.onrender.com";
 const BACKEND_ENDPOINTS = [
-  "https://sitescout-backend-9duz.onrender.com/chat"
+  `${BACKEND_BASE_URL}/chat`
 ];
+
+async function warmUpBackend() {
+  try {
+    const response = await fetch(`${BACKEND_BASE_URL}/health`, {
+      method: "GET"
+    });
+    console.log("SiteScout backend health:", response.status);
+  } catch (error) {
+    console.log("SiteScout backend warm-up failed:", error);
+  }
+}
+
 async function forwardChatRequest(payload) {
   let lastError = null;
   for (const url of BACKEND_ENDPOINTS) {
@@ -37,6 +50,7 @@ async function ensureContentScript(tabId) {
 }
 
 async function openSiteScout(sendResponse) {
+  warmUpBackend(); // wake up the Render backend as soon as the panel opens
   try {
     const tab = await getActiveTab();
     await ensureContentScript(tab.id);
@@ -48,6 +62,7 @@ async function openSiteScout(sendResponse) {
 }
 
 async function handlePopupAction(message, sendResponse) {
+  warmUpBackend();
   try {
     const tab = await getActiveTab();
     await ensureContentScript(tab.id);
@@ -59,6 +74,9 @@ async function handlePopupAction(message, sendResponse) {
     sendResponse({ ok: false, error: error?.message || "Could not communicate with webpage" });
   }
 }
+
+chrome.runtime.onInstalled.addListener(warmUpBackend);
+chrome.runtime.onStartup.addListener(warmUpBackend);
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (!message) return false;
