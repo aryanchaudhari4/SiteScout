@@ -19,7 +19,7 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_community.vectorstores import FAISS
 from langchain_core.output_parsers import StrOutputParser
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.embeddings import FastEmbedEmbeddings
 from langchain_core.documents import Document
 from langchain_groq import ChatGroq
 import os
@@ -49,7 +49,7 @@ if not GROQ_API_KEY:
 # long-running server.
 SESSION_TTL_SECONDS = 2 * 60 * 60  # 2 hours
 
-emb_model = HuggingFaceEmbeddings(model_name="BAAI/bge-small-en") # Embedding Model
+emb_model = FastEmbedEmbeddings(model_name="BAAI/bge-small-en-v1.5") # Embedding Model
 groq_model = ChatGroq(
     api_key=os.getenv("GROQ_API_KEY"),
     model="openai/gpt-oss-120b",
