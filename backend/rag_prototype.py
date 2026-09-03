@@ -12,7 +12,7 @@ from langchain_community.embeddings import FastEmbedEmbeddings
 from langchain_core.documents import Document
 
 
-emb_model = HuggingFaceEmbeddings(model_name="BAAI/bge-small-en") 
+emb_model = FastEmbedEmbeddings(model_name="BAAI/bge-small-en-v1.5")
 model = OllamaLLM(model="llama3.2:latest", num_ctx=1024) 
 
 
