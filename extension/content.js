@@ -1205,12 +1205,12 @@
     );
 
     setTimeout(() => {
-      if (!responded) {
-        responded = true;
+  if (!responded) {
+    responded = true;
 
-        finishRequest(null);
-      }
-    }, 20000);
+    finishRequest(null);
+  }
+}, 120000);
   }
 
   function finishRequest(response) {
