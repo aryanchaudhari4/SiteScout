@@ -1,200 +1,263 @@
-import socket
-
-# Force IPv4 to bypass macOS broken IPv6 resolution (fixes 75-second delay)
-orig_getaddrinfo = socket.getaddrinfo
-
-
-def getaddrinfo_ipv4(*args, **kwargs):
-    responses = orig_getaddrinfo(*args, **kwargs)
-    return [r for r in responses if r[0] == socket.AF_INET]
-
-
-socket.getaddrinfo = getaddrinfo_ipv4
-
-
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from fastapi.responses import JSONResponse
-
-from langchain_core.tools import tool
-from langchain_community.tools import DuckDuckGoSearchRun
-
-from langchain_core.messages import SystemMessage, HumanMessage
-from langchain_community.vectorstores import FAISS
-from langchain_core.output_parsers import StrOutputParser
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import FastEmbedEmbeddings
-from langchain_core.documents import Document
-from langchain_groq import ChatGroq
-
 import os
-import time
-import hashlib
 import logging
-
-from typing import Dict
+import socket
 from collections import deque
+from datetime import datetime, timedelta
+from hashlib import sha256
+from typing import Optional
+
+# -------------------------------------------------------------------
+# IPv4 preference
+# -------------------------------------------------------------------
+
+_original_getaddrinfo = socket.getaddrinfo
+
+
+def _getaddrinfo_ipv4(*args, **kwargs):
+    results = _original_getaddrinfo(*args, **kwargs)
+    return [r for r in results if r[0] == socket.AF_INET]
+
+
+socket.getaddrinfo = _getaddrinfo_ipv4
+
+# -------------------------------------------------------------------
+# Environment
+# -------------------------------------------------------------------
 
 from dotenv import load_dotenv
 
-
 load_dotenv()
-
-
-# --------------------------------------------------
-# LOGGING
-# --------------------------------------------------
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("sitescout")
-
-
-# --------------------------------------------------
-# ENVIRONMENT
-# --------------------------------------------------
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 if not GROQ_API_KEY:
-    logger.warning(
-        "GROQ_API_KEY is not set. Set it in backend/.env before making requests."
-    )
+    raise RuntimeError("GROQ_API_KEY is not set")
 
+# -------------------------------------------------------------------
+# FastAPI
+# -------------------------------------------------------------------
 
-# --------------------------------------------------
-# CONFIGURATION
-# --------------------------------------------------
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
-# How long a session stays in memory
-SESSION_TTL_SECONDS = 2 * 60 * 60  # 2 hours
+# -------------------------------------------------------------------
+# LangChain
+# -------------------------------------------------------------------
 
-# Maximum webpage text processed by the RAG pipeline.
-# This protects the Render Free instance from very large pages.
-MAX_PAGE_CHARS = 30000
+from langchain_groq import ChatGroq
+from langchain_core.messages import (
+    AIMessage,
+    HumanMessage,
+    SystemMessage,
+)
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 
+from langchain_community.vectorstores import FAISS
+from langchain_community.embeddings import FastEmbedEmbeddings
 
-# --------------------------------------------------
-# MODELS
-# --------------------------------------------------
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-emb_model = FastEmbedEmbeddings(
+# -------------------------------------------------------------------
+# DuckDuckGo
+# -------------------------------------------------------------------
+
+from ddgs import DDGS
+
+# -------------------------------------------------------------------
+# Logging
+# -------------------------------------------------------------------
+
+logging.basicConfig(level=logging.INFO)
+
+logger = logging.getLogger("sitescout")
+
+# -------------------------------------------------------------------
+# FastAPI app
+# -------------------------------------------------------------------
+
+app = FastAPI(title="SiteScout API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# -------------------------------------------------------------------
+# Configuration
+# -------------------------------------------------------------------
+
+# Maximum page text processed by SiteScout.
+# Keeps Render Free memory usage under control.
+MAX_PAGE_CHARS = 20000
+
+# Maximum text sent to the summarizer in one request.
+MAX_SUMMARY_CHARS = 18000
+
+# RAG chunk configuration.
+CHUNK_SIZE = 1500
+CHUNK_OVERLAP = 100
+
+# Number of documents retrieved for normal questions.
+TOP_K = 3
+
+# Session configuration.
+MAX_HISTORY = 5
+SESSION_TTL = timedelta(hours=2)
+
+# -------------------------------------------------------------------
+# Models
+# -------------------------------------------------------------------
+
+logger.info("Loading FastEmbed model...")
+
+embeddings = FastEmbedEmbeddings(
     model_name="BAAI/bge-small-en-v1.5"
 )
 
+logger.info("FastEmbed model loaded successfully.")
 
-groq_model = ChatGroq(
+llm = ChatGroq(
     api_key=GROQ_API_KEY,
     model="openai/gpt-oss-120b",
-    temperature=0
+    temperature=0,
 )
 
+# -------------------------------------------------------------------
+# Session storage
+# -------------------------------------------------------------------
 
-# --------------------------------------------------
-# WEB SEARCH TOOL
-# --------------------------------------------------
-
-@tool
-def web_search(query: str):
-    """
-    Search the web for information when the provided
-    document context does not contain the answer
-    or is insufficient.
-    """
-
-    search = DuckDuckGoSearchRun()
-
-    return search.run(query)
+session_db = {}
 
 
-tools = [web_search]
-
-groq_model_with_tools = groq_model.bind_tools(tools)
-
-
-# --------------------------------------------------
-# SESSION DATABASE
-# --------------------------------------------------
-
-# Each session stores:
-# - conversation history
-# - cached FAISS vectorstore
-# - hash of the indexed page
-
-session_db: Dict[str, dict] = {}
-
-
-def get_session(session_id: str) -> dict:
-
-    now = time.time()
-
-    _sweep_expired_sessions(now)
+def get_session(session_id: str):
+    now = datetime.utcnow()
 
     session = session_db.get(session_id)
 
     if session is None:
-
         session = {
-            "history": deque(maxlen=5),
+            "history": deque(maxlen=MAX_HISTORY),
             "vectorstore": None,
             "text_hash": None,
-            "last_accessed": now,
+            "last_used": now,
         }
 
         session_db[session_id] = session
 
-    session["last_accessed"] = now
+    session["last_used"] = now
 
     return session
 
 
-def _sweep_expired_sessions(now: float) -> None:
+def cleanup_sessions():
+    now = datetime.utcnow()
 
-    expired = [
-        sid
-        for sid, session in session_db.items()
-        if now - session.get("last_accessed", now)
-        > SESSION_TTL_SECONDS
-    ]
+    expired = []
 
-    for sid in expired:
+    for session_id, session in session_db.items():
+        if now - session["last_used"] > SESSION_TTL:
+            expired.append(session_id)
 
-        del session_db[sid]
+    for session_id in expired:
+        del session_db[session_id]
 
-
-# --------------------------------------------------
-# VECTORSTORE
-# --------------------------------------------------
-
-def get_or_build_vectorstore(session: dict, text: str):
-
-    text_hash = hashlib.sha256(
-        text.encode("utf-8")
-    ).hexdigest()
-
-
-    # Reuse existing vectorstore if this is the same page
-    if (
-        session["vectorstore"] is not None
-        and session["text_hash"] == text_hash
-    ):
-
+    if expired:
         logger.info(
-            "Reusing cached vectorstore."
+            "Removed %d expired sessions",
+            len(expired)
         )
 
-        return session["vectorstore"]
+
+# -------------------------------------------------------------------
+# Request model
+# -------------------------------------------------------------------
+
+class ChatRequest(BaseModel):
+    text: str
+    query: str
+    session_id: Optional[str] = None
 
 
-    # Larger chunks = fewer embeddings = lower RAM usage
+# -------------------------------------------------------------------
+# Health endpoint
+# -------------------------------------------------------------------
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+# -------------------------------------------------------------------
+# Root endpoint
+# -------------------------------------------------------------------
+
+@app.get("/")
+def root():
+    return {
+        "name": "SiteScout API",
+        "status": "running",
+        "message": "Backend is working"
+    }
+
+
+# -------------------------------------------------------------------
+# DuckDuckGo search
+# -------------------------------------------------------------------
+
+def web_search(query: str) -> str:
+    try:
+        logger.info("Performing web search for: %s", query)
+
+        results = []
+
+        with DDGS() as ddgs:
+            search_results = ddgs.text(
+                query,
+                max_results=5
+            )
+
+            for result in search_results:
+                title = result.get("title", "")
+                body = result.get("body", "")
+                href = result.get("href", "")
+
+                results.append(
+                    f"Title: {title}\n"
+                    f"Content: {body}\n"
+                    f"URL: {href}"
+                )
+
+        if not results:
+            return "No web search results found."
+
+        return "\n\n".join(results)
+
+    except Exception as e:
+        logger.exception("Web search failed")
+
+        return (
+            "Web search failed. "
+            "Please answer using the available page context."
+        )
+
+
+# -------------------------------------------------------------------
+# Build vectorstore
+# -------------------------------------------------------------------
+
+def build_vectorstore(text: str):
+
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=100
+        chunk_size=CHUNK_SIZE,
+        chunk_overlap=CHUNK_OVERLAP
     )
 
-
     chunks = splitter.split_text(text)
-
 
     logger.info(
         "Building vectorstore: %d characters -> %d chunks",
@@ -202,114 +265,217 @@ def get_or_build_vectorstore(session: dict, text: str):
         len(chunks)
     )
 
+    if not chunks:
+        return None
 
-    docs = [
-        Document(page_content=chunk)
-        for chunk in chunks
-    ]
-
-
-    vectorstore = FAISS.from_documents(
-        documents=docs,
-        embedding=emb_model
+    vectorstore = FAISS.from_texts(
+        chunks,
+        embeddings
     )
-
-
-    session["vectorstore"] = vectorstore
-    session["text_hash"] = text_hash
-
 
     return vectorstore
 
 
-# --------------------------------------------------
-# FASTAPI
-# --------------------------------------------------
+# -------------------------------------------------------------------
+# Page summarization
+# -------------------------------------------------------------------
 
-parser = StrOutputParser()
+def summarize_page(text: str) -> str:
 
-app = FastAPI()
+    # Limit text before sending it to the LLM.
+    text = text[:MAX_SUMMARY_CHARS]
 
+    logger.info(
+        "Summarizing page using direct LLM path | %d chars",
+        len(text)
+    )
 
-# --------------------------------------------------
-# CORS
-# --------------------------------------------------
+    prompt = f"""
+You are SiteScout, a webpage summarization assistant.
 
-app.add_middleware(
-    CORSMiddleware,
+Summarize the webpage content provided below.
 
-    allow_origins=["*"],
+Requirements:
 
-    allow_methods=["*"],
+- Give a clear and accurate summary.
+- Focus on the most important information.
+- Do not invent facts.
+- Ignore navigation menus, advertisements, repeated text,
+  cookie notices, and irrelevant webpage boilerplate.
+- Use bullet points where useful.
+- Keep the answer concise but informative.
+- If the page contains important dates, names, numbers,
+  achievements, or events, include them.
 
-    allow_headers=["*"],
-)
+WEBPAGE CONTENT:
 
+{text}
 
-# --------------------------------------------------
-# HEALTH CHECK
-# --------------------------------------------------
+SUMMARY:
+"""
 
-@app.get("/health")
-def health_check():
+    response = llm.invoke(prompt)
 
-    return {
-        "status": "ok"
-    }
-
-
-# --------------------------------------------------
-# REQUEST MODEL
-# --------------------------------------------------
-
-class RAGrequest(BaseModel):
-
-    text: str
-
-    query: str
-
-    session_id: str
+    return response.content
 
 
-# --------------------------------------------------
-# CHAT ENDPOINT
-# --------------------------------------------------
+# -------------------------------------------------------------------
+# Normal RAG answer
+# -------------------------------------------------------------------
+
+def answer_question(
+    text: str,
+    query: str,
+    session
+) -> str:
+
+    # Limit page content before vectorization.
+    text = text[:MAX_PAGE_CHARS]
+
+    current_hash = sha256(
+        text.encode("utf-8")
+    ).hexdigest()
+
+    # Reuse vectorstore if the page hasn't changed.
+    if (
+        session["vectorstore"] is None
+        or session["text_hash"] != current_hash
+    ):
+
+        session["vectorstore"] = build_vectorstore(text)
+        session["text_hash"] = current_hash
+
+    vectorstore = session["vectorstore"]
+
+    if vectorstore is None:
+        return (
+            "I couldn't find enough readable content "
+            "on this page to answer your question."
+        )
+
+    # Retrieve relevant chunks.
+    docs = vectorstore.similarity_search(
+        query,
+        k=TOP_K
+    )
+
+    context = "\n\n".join(
+        doc.page_content
+        for doc in docs
+    )
+
+    history_text = ""
+
+    for message in session["history"]:
+        if isinstance(message, HumanMessage):
+            history_text += f"User: {message.content}\n"
+
+        elif isinstance(message, AIMessage):
+            history_text += f"Assistant: {message.content}\n"
+
+    prompt = f"""
+You are SiteScout, an AI assistant that answers questions
+about the webpage the user is currently viewing.
+
+Use the provided webpage context to answer the user's question.
+
+Rules:
+
+1. Answer using the webpage context whenever possible.
+2. Do not invent information.
+3. If the answer cannot be found in the webpage context,
+   use web search if necessary.
+4. Consider the previous conversation when answering
+   follow-up questions.
+5. Be clear and concise.
+6. If the user asks for an explanation, explain simply.
+
+PREVIOUS CONVERSATION:
+
+{history_text}
+
+WEBPAGE CONTEXT:
+
+{context}
+
+USER QUESTION:
+
+{query}
+
+ANSWER:
+"""
+
+    response = llm.invoke(prompt)
+
+    answer = response.content
+
+    # ----------------------------------------------------------------
+    # Web fallback
+    # ----------------------------------------------------------------
+
+    # If the model indicates that the page does not contain
+    # enough information, perform a web search.
+    insufficient_phrases = [
+        "not mentioned",
+        "not provided",
+        "cannot determine",
+        "can't determine",
+        "not available",
+        "does not contain",
+        "not found in the context",
+        "insufficient information",
+    ]
+
+    should_search = any(
+        phrase in answer.lower()
+        for phrase in insufficient_phrases
+    )
+
+    if should_search:
+
+        logger.info(
+            "Page context appears insufficient. "
+            "Trying web search."
+        )
+
+        search_results = web_search(query)
+
+        web_prompt = f"""
+You are SiteScout.
+
+Answer the user's question using the webpage context
+and web search results.
+
+Do not invent facts.
+
+WEBPAGE CONTEXT:
+
+{context}
+
+WEB SEARCH RESULTS:
+
+{search_results}
+
+USER QUESTION:
+
+{query}
+
+ANSWER:
+"""
+
+        web_response = llm.invoke(web_prompt)
+
+        answer = web_response.content
+
+    return answer
+
+
+# -------------------------------------------------------------------
+# Chat endpoint
+# -------------------------------------------------------------------
 
 @app.post("/chat")
-def get_answer(payload: RAGrequest):
-
-
-    # ----------------------------------------------
-    # VALIDATION
-    # ----------------------------------------------
-
-    if not payload.text or not payload.text.strip():
-
-        raise HTTPException(
-            status_code=400,
-            detail="Page text is empty."
-        )
-
-
-    if not payload.query or not payload.query.strip():
-
-        raise HTTPException(
-            status_code=400,
-            detail="Query is empty."
-        )
-
-
-    if not GROQ_API_KEY:
-
-        raise HTTPException(
-            status_code=500,
-            detail="Server is not configured with a GROQ_API_KEY."
-        )
-
-
-    # ----------------------------------------------
-    # LOG REQUEST
-    # ----------------------------------------------
+async def chat(payload: ChatRequest):
 
     logger.info(
         "Chat request received | text=%d chars | query=%s | session=%s",
@@ -318,286 +484,121 @@ def get_answer(payload: RAGrequest):
         payload.session_id
     )
 
-
-    # ----------------------------------------------
-    # LIMIT PAGE SIZE
-    # ----------------------------------------------
-
-    page_text = payload.text[:MAX_PAGE_CHARS]
-
-
-    if len(payload.text) > MAX_PAGE_CHARS:
-
-        logger.info(
-            "Page text truncated from %d to %d characters.",
-            len(payload.text),
-            MAX_PAGE_CHARS
-        )
-
-
-    # ----------------------------------------------
-    # SESSION
-    # ----------------------------------------------
-
-    session = get_session(
-        payload.session_id
-    )
-
-    history = session["history"]
-
-
-    # ----------------------------------------------
-    # CONVERSATION HISTORY
-    # ----------------------------------------------
-
-    history_str = ""
-
-
-    for user_msg, ai_msg in history:
-
-        history_str += (
-            f"User: {user_msg}\n"
-            f"AI: {ai_msg}\n"
-        )
-
-
-    # ----------------------------------------------
-    # RAG PROCESSING
-    # ----------------------------------------------
-
     try:
 
-        vectorstore = get_or_build_vectorstore(
-            session,
-            page_text
-        )
+        cleanup_sessions()
 
+        # ------------------------------------------------------------
+        # Validate input
+        # ------------------------------------------------------------
 
-        retriever = vectorstore.as_retriever(
-            search_type="similarity",
-            search_kwargs={
-                "k": 3
+        if not payload.query.strip():
+
+            return {
+                "answer": "Please enter a question."
             }
-        )
 
+        if not payload.text.strip():
 
-        relevant_docs = retriever.invoke(
-            payload.query
-        )
-
-
-        context = "\n\n".join(
-            [
-                doc.page_content
-                for doc in relevant_docs
-            ]
-        )
-
-
-        # ------------------------------------------
-        # LLM MESSAGES
-        # ------------------------------------------
-
-        messages = [
-
-            SystemMessage(
-                content="""
-You are a helpful assistant.
-
-RULES:
-
-1. Answer ONLY from the provided document context
-   and conversation history.
-
-2. If the document context is completely unrelated
-   or does not contain the answer, call the web_search
-   tool.
-
-3. Do NOT start answers with phrases like
-   "Based on the context..." or
-   "According to the document...".
-
-4. Answer directly.
-"""
-            ),
-
-            HumanMessage(
-                content=f"""
-Conversation History:
-{history_str}
-
-Document Context:
-{context}
-
-User's question:
-{payload.query}
-"""
-            )
-        ]
-
-
-        # ------------------------------------------
-        # FIRST GROQ CALL
-        # ------------------------------------------
-
-        response = groq_model_with_tools.invoke(
-            messages
-        )
-
-
-        source = "page"
-
-
-        # ------------------------------------------
-        # WEB SEARCH FALLBACK
-        # ------------------------------------------
-
-        if response.tool_calls:
-
-            tool_call = response.tool_calls[0]
-
-            tool_name = tool_call["name"]
-
-            tool_args = tool_call["args"]
-
-
-            if tool_name == "web_search":
-
-                source = "web_search"
-
-
-                search_query = tool_args.get(
-                    "query",
-                    payload.query
+            return {
+                "answer": (
+                    "I couldn't extract readable content "
+                    "from this webpage."
                 )
+            }
 
+        session_id = (
+            payload.session_id
+            or "default"
+        )
+
+        session = get_session(session_id)
+
+        # ------------------------------------------------------------
+        # Special handling for page summarization
+        # ------------------------------------------------------------
+
+        if payload.query.strip().lower() in {
+            "summarize this page",
+            "summarise this page",
+            "summarize the page",
+            "summarise the page",
+        }:
+
+            logger.info(
+                "Summary request detected. "
+                "Skipping FAISS/vectorstore."
+            )
+
+            page_text = payload.text[:MAX_SUMMARY_CHARS]
+
+            if len(payload.text) > MAX_SUMMARY_CHARS:
 
                 logger.info(
-                    "Web search tool called: %s",
-                    search_query
+                    "Summary text truncated from %d to %d characters.",
+                    len(payload.text),
+                    MAX_SUMMARY_CHARS
                 )
 
-
-                try:
-
-                    search_result = web_search.invoke(
-                        {
-                            "query": search_query
-                        }
-                    )
-
-
-                except Exception:
-
-                    logger.exception(
-                        "Web search failed"
-                    )
-
-                    search_result = (
-                        "No search results were available."
-                    )
-
-
-                # ----------------------------------
-                # FINAL GROQ RESPONSE
-                # ----------------------------------
-
-                agent_prompt = f"""
-You are a helpful assistant.
-
-The user asked a question, but the webpage context
-was insufficient.
-
-So, you searched the web and retrieved the following
-results.
-
-CRITICAL:
-
-Do NOT start your answer with introductory phrases
-like "Based on the search results..." or
-"Based on the history...".
-
-Just answer the question directly.
-
-Conversation History:
-
-{history_str}
-
-
-Web Search Results:
-
-{search_result}
-
-
-User's question:
-
-{payload.query}
-
-
-Please answer the user's question accurately using
-these search results and the conversation history.
-"""
-
-
-                final_response = groq_model.invoke(
-                    agent_prompt
-                )
-
-
-                answer = final_response.content
-
-
-            else:
-
-                answer = response.content
-
+            answer = summarize_page(page_text)
 
         else:
 
-            answer = response.content
+            # --------------------------------------------------------
+            # Normal RAG question
+            # --------------------------------------------------------
 
+            page_text = payload.text[:MAX_PAGE_CHARS]
 
-    # ----------------------------------------------
-    # ERROR HANDLING
-    # ----------------------------------------------
+            if len(payload.text) > MAX_PAGE_CHARS:
 
-    except HTTPException:
+                logger.info(
+                    "Page text truncated from %d to %d characters.",
+                    len(payload.text),
+                    MAX_PAGE_CHARS
+                )
 
-        raise
+            answer = answer_question(
+                page_text,
+                payload.query,
+                session
+            )
 
+        # ------------------------------------------------------------
+        # Save conversation history
+        # ------------------------------------------------------------
 
-    except Exception:
+        session["history"].append(
+            HumanMessage(
+                content=payload.query
+            )
+        )
+
+        session["history"].append(
+            AIMessage(
+                content=answer
+            )
+        )
+
+        logger.info(
+            "Chat request completed successfully | session=%s",
+            session_id
+        )
+
+        return {
+            "answer": answer
+        }
+
+    except Exception as e:
 
         logger.exception(
-            "Error while answering /chat request"
+            "Chat request failed"
         )
 
-
-        raise HTTPException(
-            status_code=500,
-            detail="Something went wrong while generating an answer."
-        )
-
-
-    # ----------------------------------------------
-    # SAVE CONVERSATION
-    # ----------------------------------------------
-
-    history.append(
-        (
-            payload.query,
-            answer
-        )
-    )
-
-
-    # ----------------------------------------------
-    # RESPONSE
-    # ----------------------------------------------
-
-    return JSONResponse(
-        content={
-            "answer": answer,
-            "source": source
+        return {
+            "answer": (
+                "Sorry, I couldn't process this request "
+                "right now. Please try again."
+            ),
+            "error": "request_processing_failed"
         }
-    )
