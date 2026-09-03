@@ -16,3 +16,4 @@ fastembed
 
 # Groq
 groq
+ddgs
