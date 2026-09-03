@@ -49,7 +49,7 @@ if not GROQ_API_KEY:
 # long-running server.
 SESSION_TTL_SECONDS = 2 * 60 * 60  # 2 hours
 
-emb_model = HuggingFaceEmbeddings(model_name="BAAI/bge-small-en") # Embedding Model
+emb_model = FastEmbedEmbeddings(model_name="BAAI/bge-small-en-v1.5") # Embedding Model
 groq_model = ChatGroq(
     api_key=os.getenv("GROQ_API_KEY"),
     model="openai/gpt-oss-120b",
