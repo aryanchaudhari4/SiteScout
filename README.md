@@ -9,7 +9,7 @@
 ![Chrome Extension](https://img.shields.io/badge/Platform-Chrome%20Extension-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Groq](https://img.shields.io/badge/LLM-Groq%20Llama%203.3-F55036?style=for-the-badge)
+![Groq](https://img.shields.io/badge/LLM-GPT--OSS%20120B%20on%20Groq-F55036?style=for-the-badge)
 ![FAISS](https://img.shields.io/badge/Vector%20Search-FAISS-00A67E?style=for-the-badge)
 
 </div>
@@ -31,8 +31,8 @@ No tab-switching. No copy-pasting text into ChatGPT. Just ask, right there on th
 | | |
 |---|---|
 | 🧠 **RAG-based Q&A** | Answers are grounded in the actual page content using FAISS vector retrieval |
-| ⚡ **Blazing-fast LLM** | Powered by Groq's `llama-3.3-70b-versatile` for near-instant responses |
-| 🌐 **Smart Web Fallback** | Automatically searches the web when the page alone can't answer |
+| ⚡ **Blazing-fast LLM** | Powered by `openai/gpt-oss-120b` served on Groq for near-instant responses |
+| 🌐 **Smart Web Fallback** | Automatically searches the web (via DuckDuckGo) when the page alone can't answer |
 | 💬 **Multi-turn Memory** | Remembers context within a session for natural follow-up questions |
 | 🎨 **Shadow DOM Overlay** | A fully isolated in-page UI — no CSS conflicts with the host site, ever |
 | 🔖 **Source Badges** | Every answer is tagged as coming from the **page** or the **web** |
@@ -65,11 +65,12 @@ SiteScout is built as a clean, layered pipeline — from the browser UI down to 
 ┌─────────────────────────────────────────────────────────┐
 │                  FastAPI Backend  (/chat)                │
 │                                                            │
-│   Request → RAG Pipeline → FAISS + HuggingFace Embeddings  │
+│   Request → RAG Pipeline → FAISS + FastEmbed Embeddings    │
 │                    ↓                                        │
-│         Groq LLM  (llama-3.3-70b-versatile)                 │
+│      LLM (openai/gpt-oss-120b via Groq + LangChain)         │
 │                    ↓                                        │
-│      Web-Search Fallback (if page context insufficient)     │
+│      Web-Search Fallback via DDGS (if page context          │
+│      insufficient)                                          │
 │                    ↓                                        │
 │              Response → rendered in overlay                 │
 └─────────────────────────────────────────────────────────┘
@@ -88,10 +89,10 @@ SiteScout is built as a clean, layered pipeline — from the browser UI down to 
 `JavaScript` · `Chrome Extension APIs (Manifest V3)` · `Shadow DOM` · `Service Workers`
 
 **Backend**
-`Python` · `FastAPI` · `Uvicorn`
+`Python` · `FastAPI` · `Uvicorn` · `LangChain`
 
 **AI / ML**
-`RAG (Retrieval-Augmented Generation)` · `FAISS` (vector similarity search) · `HuggingFace Embeddings (BAAI/bge-small-en)` · `Groq LLM API (Llama 3.3 70B)`
+`RAG (Retrieval-Augmented Generation)` · `FAISS` (vector similarity search) · `FastEmbed Embeddings (BAAI/bge-small-en-v1.5)` · `Groq API` running `openai/gpt-oss-120b` · `DDGS` for web-search fallback
 
 ---
 
@@ -106,7 +107,7 @@ source venv/bin/activate      # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-Create a `.env` file inside `backend/`:
+Create a `.env` file inside `backend/` (see `.env.example`):
 
 ```env
 GROQ_API_KEY=your_groq_api_key_here
@@ -144,7 +145,8 @@ SiteScout/
 ├── backend/
 │   ├── main.py                # FastAPI app — RAG + LLM + web-search fallback (/chat, /health)
 │   ├── rag_prototype.py       # Standalone prototype script
-│   └── requirements.txt
+│   ├── requirements.txt
+│   └── .env.example
 ├── extension/
 │   ├── manifest.json
 │   ├── background.js          # Relays chat requests to the backend
@@ -152,7 +154,7 @@ SiteScout/
 │   ├── popup.html
 │   ├── popup.css
 │   ├── popup.js                # Lightweight launcher + health check
-│   └── icon.jpg
+│   └── icon-16.png / icon-32.png / icon-48.png / icon-128.png / icon.png
 └── README.md
 ```
 
